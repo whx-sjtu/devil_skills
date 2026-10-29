@@ -1,0 +1,4 @@
+interface:
+  display_name: "远程 CI 运行 PD 实验"
+  short_description: "通过 GitHub Actions 和 Slurm 运行 vLLM PD 分离实验并核验结果"
+  default_prompt: "使用 $run-pd-ci，按当前约定的源码版本和实验配置运行远程 PD 分离实验，持续跟踪并给出评测、传输与清理证据。"
