@@ -1,0 +1,4 @@
+interface:
+  display_name: "InferenceX 风格 agentic 图"
+  short_description: "把性能数据叠加到 InferenceX 官方 agentic 图，或画成同风格的独立图"
+  default_prompt: "使用 $infx-agentic-chart，把给定的性能数据画到指定模型的 InferenceX 官方 agentic 图上，或按 InferenceX 风格单独出图。"

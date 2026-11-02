@@ -1,0 +1,126 @@
+{
+ "title": "Kimi K3 2.8T Agentic Token Throughput per Chip vs. Interactivity",
+ "official": {
+  "model": "Kimi-K3",
+  "series": [
+   "gb300_dynamo-vllm",
+   "gb200_dynamo-vllm",
+   "mi355x_atom",
+   "mi355x_vllm-disagg"
+  ]
+ },
+ "sources": [
+  "ROCm/ATOM atomesh-benchmark CI"
+ ],
+ "notes": [
+  "vllm optimized mooncake: 1P1D, 16 chips, P/D and offload over Mooncake RDMA, best config per concurrency",
+  "ATOM PD: 1P1D, 16 chips; C1–C56 ATOM #2709 nightly, C72/C88 runs 40184716007/40184707637"
+ ],
+ "series": [
+  {
+   "hw": "MI355X",
+   "engine": "ATOM PD",
+   "baseline": true,
+   "color": "#6a3d9a",
+   "points": [
+    {
+     "conc": 1,
+     "tput": 912.0,
+     "interactivity": 164.0
+    },
+    {
+     "conc": 2,
+     "tput": 920.0,
+     "interactivity": 151.0
+    },
+    {
+     "conc": 4,
+     "tput": 1457.0,
+     "interactivity": 143.4
+    },
+    {
+     "conc": 16,
+     "tput": 5336.0,
+     "interactivity": 102.9
+    },
+    {
+     "conc": 32,
+     "tput": 10441.0,
+     "interactivity": 73.2
+    },
+    {
+     "conc": 48,
+     "tput": 13291.0,
+     "interactivity": 59.4
+    },
+    {
+     "conc": 56,
+     "tput": 14684.0,
+     "interactivity": 51.2
+    },
+    {
+     "conc": 72,
+     "tput": 16479.0,
+     "interactivity": 38.3
+    },
+    {
+     "conc": 88,
+     "tput": 18025.0,
+     "interactivity": 33.8
+    }
+   ]
+  },
+  {
+   "hw": "MI355X",
+   "engine": "vllm optimized mooncake",
+   "highlight": true,
+   "points": [
+    {
+     "conc": 1,
+     "tput": 985.84,
+     "interactivity": 181.47
+    },
+    {
+     "conc": 2,
+     "tput": 960.91,
+     "interactivity": 162.29
+    },
+    {
+     "conc": 4,
+     "tput": 1485.67,
+     "interactivity": 148.03
+    },
+    {
+     "conc": 16,
+     "tput": 5257.42,
+     "interactivity": 108.04
+    },
+    {
+     "conc": 32,
+     "tput": 10492.22,
+     "interactivity": 75.77
+    },
+    {
+     "conc": 48,
+     "tput": 13076.26,
+     "interactivity": 59.9
+    },
+    {
+     "conc": 56,
+     "tput": 14312.77,
+     "interactivity": 52.16
+    },
+    {
+     "conc": 72,
+     "tput": 16523.77,
+     "interactivity": 37.92
+    },
+    {
+     "conc": 88,
+     "tput": 17141.59,
+     "interactivity": 34.35
+    }
+   ]
+  }
+ ]
+}
