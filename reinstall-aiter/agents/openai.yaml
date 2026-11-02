@@ -1,0 +1,4 @@
+interface:
+  display_name: "重装 aiter"
+  short_description: "切换 aiter 版本或改代码后，清理 JIT 产物并从源码重装"
+  default_prompt: "使用 $reinstall-aiter，在 aiter 源码目录清理旧安装和构建产物后重新安装，并核验安装版本与当前 HEAD 一致。"
