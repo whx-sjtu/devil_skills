@@ -1,6 +1,6 @@
 # PD 实验证据与判定
 
-准备 contract、分析运行结果、比较 A/B 或复现历史 K3 实验时读取。
+准备 contract、分析运行结果、比较 A/B 或复现实验时读取。
 
 ## 一份结果对应一个版本和一个执行窗口
 
@@ -30,17 +30,7 @@
 - 每个 draft 位置的接受率；位置数来自实际 speculative 配置。
 - 平均接受长度与 token 接受率不是同一指标，是否含 bonus token 需写清。
 
-本工作区可选工具（先检查其实现对当前实验的适用性）：
-
-```bash
-"$PD_PYTHON" /app/test_scripts/dspark_pd/validation/summarize_gsm8k_ci.py \
-  "$PD_CANONICAL" --threshold "$PD_THRESHOLD" \
-  --draft-positions "$PD_DRAFT_POSITIONS" --require-pass
-"$PD_PYTHON" /app/test_scripts/dspark_pd/validation/spec_acceptance.py \
-  "$PD_METRICS_BEFORE" "$PD_METRICS_AFTER"
-```
-
-这些工具缺失时直接解析对应结果 JSON/JSONL 和 metrics；不需要为了出分数重新运行模型。工具可能含 K3 的固定参数校验，其他模型需按 contract 判断。无 spec 实验不要求 draft 计数器。
+优先复用适用于当前 contract 的结果分析工具；没有合适工具时直接解析归档的 JSON/JSONL 和 metrics，不需要为了出分数重新运行模型。无 spec 实验不要求 draft 计数器。
 
 ## 性能
 
@@ -50,7 +40,7 @@
 
 A/B 记录每个 case 的实际主机、GPU 型号/数量和 P/D 角色映射。自动分配可能使各组落在不同机器上；把这一差异列为潜在混杂变量，按匹配的节点/角色分组比较，或用重复测量评估机器间波动。若证据不足以隔离机器差异，保留结果并限制归因，不把全部差异解释为模型配置收益。
 
-本工作区工具为 `validation/summarize_pd_benchmark.py ROOT --concurrency N --duration SECONDS --require-complete`。旧 `compare_pd_performance.py` 曾硬编码 C64、3600 秒和历史 reference run；先核对实现，不能仅更换 `--reference` 就当成通用比较器。
+使用性能汇总或比较工具前，核对其并发、时长、基线和完整性检查与本次 contract 一致，避免沿用硬编码的实验参数。
 
 ## 分层记录最终状态
 
@@ -65,37 +55,4 @@ A/B 记录每个 case 的实际主机、GPU 型号/数量和 P/D 角色映射。
 3. 五层状态、错误/缺失证据、cleanup 和活跃监控位置。
 4. 可复现所需的 inputs、matrix、manifests、日志/结果目录。
 
-## 历史 K3 基线：用于复现，不作为通用默认值
-
-[Run 37203257111](https://github.com/ROCm/ATOM/actions/runs/37203257111)，2026-10-04，Slurm `5423`：
-
-| 项目 | 已记录值 |
-| --- | --- |
-| Harness | `ROCm/ATOM`，`whx/k3-gsm8k-connector-zeroing-20261004`，`fd03f650a35c87eb2726b97aa6c9e44f4b6f33a9` |
-| vLLM 集成 | `whx-sjtu/vllm`，`34735d6776b9c43086fdf5c6c6392d9de45f322f` |
-| Case | `kimi-k3-gsm8k-connector-zeroing-dspark3-tp8-dcp8-eager` |
-| 模型 | `/mnt/models/moonshotai/Kimi-K3`；draft `/mnt/models/Inferact/Kimi-K3-DSpark` |
-| 拓扑 | P8/D8，双方 TP8/DCP8，MoRI READ，eager，无 LMCache，自然 DSpark3 |
-| 实际模型镜像 | `vllm/vllm-openai-rocm:nightly@sha256:659b28319fef4ea0e3d8f33e25b4c35d6f663f5d818a5b2fa06dceaf859234e4` |
-| 实际 router 镜像 | `vllm/vllm-router:nightly-20260912-83944c4@sha256:ac68315ab8642c253571316a7ac377df51794665e5c20fb95e7b84b40f9021e3` |
-| 历史资源与实际分配 | runner `atomesh-cicd`；account `amd-frameworks`；partition `amd-spur`；QoS `amd-frameworks-qos`；实际为 g13/g25 两节点，主机名仅作历史记录 |
-| 精度 contract | 全量 GSM8K 1319 题，5-shot，C64，max_gen_toks=4096，无 limit；阈值 0.94 |
-| 实测 | strict/flexible 均 1268/1319 = 96.1334%；P/D 各 1319 HTTP 200，无 evaluator 重试 |
-| 自然接受率 | 96858/126675 = 76.4618%，三个 draft 位置均为正 |
-| Actions | `completed / success` |
-| Slurm / workload | `FAILED / 1:0`；workload `COMPLETED`，reconciled result rc=0 |
-| 清理 | 双端 rank rc=0，cleanup 完成，容器查询 rc=0 且列表为空 |
-
-该 harness `accuracy.threshold=0.0` 用于收集结果，独立验收仍要求 0.94。性能字段存在于 matrix，但 `ATOMESH_EVAL_ONLY=1`，所以这次不能提供正式性能结论。
-
-评测结果时间为 13:46:18 UTC，P shutdown 为 13:46:22，P output-handler `EngineDeadError` 为 13:46:34。准确表述是“Actions 成功，模型精度通过且 workload/清理完成，保留 Slurm 失败和 teardown 异常”；不是 Actions 失败，也不是所有层都无异常。
-
-集成还含 K3 grouping、TCP listener 和 discovery heartbeat 前置修复。这个结果属于上述集成及当时的 connector 实现，不能自动覆盖后续 PR 提交、FULL graph、WRITE 或性能配置。
-
-本工作区原始证据入口：
-
-- `/app/test_scripts/dspark_pd/remote-37203257111/`：Actions 元信息和最终 artifact。
-- `/app/test_scripts/dspark_pd/native-migration/pr59164-connector-zeroing-20261004/`：`inputs.json`、本地及远端 matrix、源码前置补丁。
-- `/app/test_scripts/dspark_pd/native-migration/pr59164-review-20261006/model-review.json`：独立重算、canonical 目录和时序。
-
-这些文件不存在时优先从 run artifact 恢复。artifact 已过期则标明无法恢复的部分，保留已知版本/结果与其证据来源。
+本地证据缺失时优先从对应 run 的 artifact 恢复。artifact 已过期则标明无法恢复的部分，保留已知版本/结果与其证据来源。

@@ -9,7 +9,7 @@ description: Run and monitor prefill/decode (PD) GPU performance experiments thr
 
 ## CI 资源约束
 
-用户于 2026-10-12 明确要求：**CI 只用于 GPU 性能测试；每批最多发起 2 个 workflow，两批至少间隔 1 小时。** 对该用户的远程 PD 工作持续遵守此约束；后续明确指令可更新它。
+**CI 只用于 GPU 性能测试；每批最多发起 2 个 workflow，两批至少间隔 1 小时。** 后续明确指令可更新此资源约束。
 
 - CPU 测试、配置预检、日志分析在本地执行。状态查询和日志采集使用现有 run 的只读 API、artifact 或已授权的集群访问；不派发 inspection workflow，也不为队列、健康或清理检查新建 CI。
 - 重试、取消后重提均计入批次数和时间间隔。跨分支、跨 PD 任务合并计算；记录最近派发时间和下一批最早时间。到时不自动重提，先确认已有实验和本次测试目的。
@@ -31,7 +31,7 @@ description: Run and monitor prefill/decode (PD) GPU performance experiments thr
 - 实验目的：启动检查、精度、性能或 A/B；并发、输入/输出长度、时长、数据集/评测参数和验收条件。
 - 已约定的 runner/account/partition/QoS、超时和结果目录。
 
-只在缺失信息会改变实验含义或资源范围时澄清；准备不依赖答案的工作。历史 K3 参数见 [结果核验与历史基线](references/evidence.md)，它们不是所有 PD 实验的默认值。
+只在缺失信息会改变实验含义或资源范围时澄清；准备不依赖答案的工作。验收与证据要求见 [结果核验](references/evidence.md)。
 
 ## 2. 准备可复现的候选
 
