@@ -52,7 +52,7 @@
 
 纯精度 case 是否跳过性能，继续检查 cell 的 `ATOMESH_EVAL_ONLY=1` 和 `run_eval`；不要仅由 `run_model_benchmark` 的名字判断。
 
-将下面 `PD_*` 变量设为本次 contract 的实际值：`PD_HARNESS`、`PD_OUT`、`PD_PYTHON`、`PD_CASE`、`PD_IMAGE`、`PD_ACCOUNT`、`PD_PARTITION`、`PD_RUNNER`、`PD_EVAL_CONCURRENCY`。另按目标 runner 配置 `PD_MODEL_ROOT`、`PD_LOG_ROOT` 和 `PD_RANK_MAPPING_POLICY`。`PD_OUT` 用新的本地实验目录；所有命令在同一 shell 或显式传入相同环境执行。以下是支持自动分配的 `atomesh-cicd` 双节点示例，远端实验 workflow 也须清空默认池。
+将下面 `PD_*` 变量设为本次 contract 的实际值：`PD_HARNESS`、`PD_OUT`、`PD_PYTHON`、`PD_CASE`、`PD_IMAGE`、`PD_ACCOUNT`、`PD_PARTITION`、`PD_RUNNER`、`PD_EVAL_CONCURRENCY`。`PD_MODEL_ROOT`、`PD_LOG_ROOT` 和 `PD_RANK_MAPPING_POLICY` 未设置或为空时，分别使用默认值 `/mnt/models`、`/it-share/ATOMESH_LOG/` 和 `none`；可按目标 runner 显式覆盖。`PD_OUT` 用新的本地实验目录；所有命令在同一 shell 或显式传入相同环境执行。以下是支持自动分配的 `atomesh-cicd` 双节点示例，远端实验 workflow 也须清空默认池。
 
 ```bash
 export ATOMESH_SLURM_ACCOUNT="$PD_ACCOUNT"
@@ -62,9 +62,9 @@ export ATOMESH_SINGLE_NODE=auto
 export ATOMESH_1P1D_NODES=""
 export ATOMESH_2P1D_NODES=""
 export ATOMESH_NODE_POOL=""
-export ATOMESH_MODEL_ROOT="$PD_MODEL_ROOT"
-export ATOMESH_LOG_ROOT="$PD_LOG_ROOT"
-export ATOMESH_PD_RANK_MAPPING_POLICY="$PD_RANK_MAPPING_POLICY"
+export ATOMESH_MODEL_ROOT="${PD_MODEL_ROOT:-/mnt/models}"
+export ATOMESH_LOG_ROOT="${PD_LOG_ROOT:-/it-share/ATOMESH_LOG/}"
+export ATOMESH_PD_RANK_MAPPING_POLICY="${PD_RANK_MAPPING_POLICY:-none}"
 export PD_OUT
 mkdir -p "$PD_OUT"
 cd "$PD_HARNESS"
