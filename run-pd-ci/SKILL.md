@@ -9,13 +9,14 @@ description: Run and monitor prefill/decode (PD) GPU performance experiments thr
 
 ## CI 资源约束
 
-用户于 2026-10-12 明确要求：**CI 只用于 GPU 性能测试；每批最多发起 2 个 workflow，两批至少间隔 1 小时。** 对该用户的远程 PD 工作持续遵守此约束；后续明确指令可更新它。
+**CI 只用于 GPU 性能测试；每批最多发起 2 个 workflow，两批至少间隔 1 小时。** 后续明确指令可更新此资源约束。
 
 - CPU 测试、配置预检、日志分析在本地执行。状态查询和日志采集使用现有 run 的只读 API、artifact 或已授权的集群访问；不派发 inspection workflow，也不为队列、健康或清理检查新建 CI。
 - 重试、取消后重提均计入批次数和时间间隔。跨分支、跨 PD 任务合并计算；记录最近派发时间和下一批最早时间。到时不自动重提，先确认已有实验和本次测试目的。
 - GPU 性能实验可在同一 workload 内包含必要的启动与正确性验收；不单独派发 CPU inspection 或纯诊断 CI。先复用已有实验证据。
 - 接续任务时检查后台监控是否会调用 `gh workflow run`。保留只读监控；停用自动 inspection 派发，并清理已确认属于本任务的多余排队 inspection。
-- 节点默认由调度器在已约定的 runner/account/partition/QoS 范围内自动分配，只指定节点数和每节点 GPU 数。历史主机名用于结果记录，不作为新实验的提交名单；仅在用户明确要求固定节点时采用该要求。自动分配的输入、默认节点池和提交参数核验见[平台操作](references/atomesh.md#节点选择)。
+- **禁止指定特定节点下发 CI。** 节点由调度器在已约定的 runner/account/partition/QoS 范围内自动分配，只指定节点数和每节点 GPU 数；不得通过节点 input、主机名单、`-w` / `--nodelist` 或等价约束绑定特定节点。历史主机名仅用于结果记录，不作为新实验或重试的提交名单。
+- **用户未明确要求时，禁止显式排除特定节点。** 不得在 workflow inputs、case/YAML、环境变量或提交参数中设置节点排除名单（如 `-x` / `--exclude`）；历史故障、排队或性能差异不能作为自行排除节点的依据。用户明确要求排除时，仅应用其指定的排除范围，并记录在 contract 中。自动分配、默认节点池和提交参数核验见[平台操作](references/atomesh.md#节点选择)。
 
 ## 1. 接续现有任务并固定实验范围
 
@@ -30,7 +31,7 @@ description: Run and monitor prefill/decode (PD) GPU performance experiments thr
 - 实验目的：启动检查、精度、性能或 A/B；并发、输入/输出长度、时长、数据集/评测参数和验收条件。
 - 已约定的 runner/account/partition/QoS、超时和结果目录。
 
-只在缺失信息会改变实验含义或资源范围时澄清；准备不依赖答案的工作。历史 K3 参数见 [结果核验与历史基线](references/evidence.md)，它们不是所有 PD 实验的默认值。
+只在缺失信息会改变实验含义或资源范围时澄清；准备不依赖答案的工作。验收与证据要求见 [结果核验](references/evidence.md)。
 
 ## 2. 准备可复现的候选
 
