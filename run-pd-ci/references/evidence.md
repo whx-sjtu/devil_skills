@@ -2,6 +2,8 @@
 
 准备 contract、分析运行结果、比较 A/B 或复现实验时读取。
 
+成功运行参考：[ROCm/ATOM run 43816872475](https://github.com/ROCm/ATOM/actions/runs/43816872475)（Actions `success`，PD benchmark 与结果汇总 job 均成功，并生成性能结果 artifact）。用于参考执行流程和结果组织；实验参数与节点选择仍遵守当前 contract 和 CI 资源约束。
+
 ## 一份结果对应一个版本和一个执行窗口
 
 选取最终模型 artifact 内唯一的 `case-id/slurm_job-ID` 目录作为该 case 的 canonical 根目录。列出其中的 phase、rank 和 run token；同名文件存在于快照、容器副本、汇总 artifact 时只计 canonical 那一份。
