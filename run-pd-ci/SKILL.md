@@ -15,7 +15,8 @@ description: Run and monitor prefill/decode (PD) GPU performance experiments thr
 - 重试、取消后重提均计入批次数和时间间隔。跨分支、跨 PD 任务合并计算；记录最近派发时间和下一批最早时间。到时不自动重提，先确认已有实验和本次测试目的。
 - GPU 性能实验可在同一 workload 内包含必要的启动与正确性验收；不单独派发 CPU inspection 或纯诊断 CI。先复用已有实验证据。
 - 接续任务时检查后台监控是否会调用 `gh workflow run`。保留只读监控；停用自动 inspection 派发，并清理已确认属于本任务的多余排队 inspection。
-- 节点默认由调度器在已约定的 runner/account/partition/QoS 范围内自动分配，只指定节点数和每节点 GPU 数。历史主机名用于结果记录，不作为新实验的提交名单；仅在用户明确要求固定节点时采用该要求。自动分配的输入、默认节点池和提交参数核验见[平台操作](references/atomesh.md#节点选择)。
+- **禁止指定特定节点下发 CI。** 节点由调度器在已约定的 runner/account/partition/QoS 范围内自动分配，只指定节点数和每节点 GPU 数；不得通过节点 input、主机名单、`-w` / `--nodelist` 或等价约束绑定特定节点。历史主机名仅用于结果记录，不作为新实验或重试的提交名单。
+- **用户未明确要求时，禁止显式排除特定节点。** 不得在 workflow inputs、case/YAML、环境变量或提交参数中设置节点排除名单（如 `-x` / `--exclude`）；历史故障、排队或性能差异不能作为自行排除节点的依据。用户明确要求排除时，仅应用其指定的排除范围，并记录在 contract 中。自动分配、默认节点池和提交参数核验见[平台操作](references/atomesh.md#节点选择)。
 
 ## 1. 接续现有任务并固定实验范围
 

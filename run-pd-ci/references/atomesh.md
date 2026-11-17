@@ -23,17 +23,17 @@
 
 ## 节点选择
 
-默认按节点数和每节点 GPU 数申请，由调度器选择实际主机。2026-10-13 用户确认，C48 [run 38312105401](https://github.com/ROCm/ATOM/actions/runs/38312105401) 的固定主机请求造成调度死锁；复现历史参数或做 A/B 时也应沿用自动分配，并在结果中记录实际分配。
+遵守 [CI 资源约束](../SKILL.md#ci-资源约束)：禁止指定特定节点，用户未明确要求时禁止显式排除特定节点。按节点数和每节点 GPU 数申请，由调度器选择实际主机。2026-10-13 用户确认，C48 [run 38312105401](https://github.com/ROCm/ATOM/actions/runs/38312105401) 的固定主机请求造成调度死锁；复现历史参数或做 A/B 时也应沿用自动分配，并在结果中记录实际分配。
 
 对支持自动分配的 `atomesh-cicd` / TW→Spur 路径，核验完整链路：
 
 1. workflow 节点 input 使用该版本支持的 `auto` 或空值；本地 matrix builder 使用 workflow 解析后的空值，不把字面量 `auto` 当作主机名传入。
-2. 清空本地和远端实验 workflow 的 `ATOMESH_NODE_POOL`，并检查 case/YAML 继承和环境变量是否仍填入主机名单。只清空 input 或只改本地环境均不充分。
+2. 清空本地和远端实验 workflow 的 `ATOMESH_NODE_POOL`，并检查 workflow inputs/默认值、case/YAML 继承和环境变量是否仍填入主机名单。用户未明确要求排除节点时，也须清除这些位置的显式节点排除配置；有明确要求时，核对排除范围与 contract 一致。只清空 input 或只改本地环境均不充分。
 3. 展开的 cell 应为 `nodes: []`，`num_nodes` 和每节点 GPU 数按 contract 保留。历史版本曾把候选名单长度误当成申请节点数，须分别检查。
-4. 检查实际提交命令构造路径，确认没有 `-w`、`--nodelist` 或等价的固定主机约束。已核对的 Spur helper 对非空候选池也会生成 `-w`，扩大名单不能代替移除约束。
+4. 检查实际提交命令构造路径，确认没有 `-w`、`--nodelist` 或等价的固定主机约束；用户未明确要求排除节点时，也不得出现 `-x`、`--exclude` 或等价排除约束，有明确要求时则核对实际排除范围。已核对的 Spur helper 对非空候选池也会生成 `-w`，扩大名单不能代替移除约束。
 5. 派发后比较远端 matrix，并从该次正式性能 run 的提交日志、分配元信息确认实际参数和节点。
 
-其他 runner 先核对其接口：有些版本要求非空候选池，不能直接套用上述空值。区分平台要求的候选范围与强制主机名单，在已约定资源范围内选择受支持的调度方式。
+其他 runner 先核对其接口：有些版本要求非空候选池，不能直接套用上述空值。区分平台要求的候选范围与强制主机名单，在已约定资源范围内选择受支持的自动调度方式；若该路径必须指定特定主机，停止派发并报告限制，不以固定节点绕过。
 
 ## 准备 inputs 与本地 matrix
 
@@ -46,7 +46,7 @@
 | `suite` / `case_names` | 通常 `vllm`，明确选择一个或少量 case |
 | `atomesh_slurm_submit_runner` | 已约定的提交 runner |
 | `atomesh_slurm_account` / `atomesh_slurm_partition` | 配额与分区；检查最终 QoS 映射 |
-| `atomesh_1p1d_nodes` / `atomesh_2p1d_nodes` / `atomesh_single_node` | 默认使用目标 workflow 支持的自动分配值；同时按[节点选择](#节点选择)检查默认池和最终提交参数 |
+| `atomesh_1p1d_nodes` / `atomesh_2p1d_nodes` / `atomesh_single_node` | 使用目标 workflow 支持的自动分配值；同时按[节点选择](#节点选择)检查默认池、排除配置和最终提交参数 |
 | `atomesh_image` | 固定 digest，并核对展开后的实际镜像 |
 | `eval_concurrency` / `benchmark_concurrency` | 两种不同负载的并发 |
 | `run_model_benchmark` | 该 workflow 的模型任务开关，纯精度 case 也可能需要 `true` |
